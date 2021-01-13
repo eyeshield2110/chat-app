@@ -18,11 +18,18 @@ document.querySelector('#increment')
 /* ---------------------------- End Event Listener: counter ---------------------------  */
 
 /* ---------------------------- Event Listener: Display msg ---------------------------- */
-// server -> client: server display increment message on the client-side
-socket.on('message', (data) => {
+// server -> client: server display message on the client-side
+socket.on('message', (data, thisUser) => {
     console.log(data) // receives welcome message + user chat messages
+
+    // display sender of the message; if sender is the server, display room name
+    let sender = ''
+    if (!thisUser.username)
+        sender = "Admin"
+    else
+        sender = thisUser.username
     const html = Mustache.render(messageTemplate, { // from mustache library
-       // username: data.username,
+       username: sender,
         message: data.text,
         createdAt: moment(data.createdAt).format('h:mm a').toUpperCase() // from moment library
     })

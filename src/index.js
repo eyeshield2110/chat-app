@@ -53,14 +53,14 @@ io.on('connection', (socket) => {
 
         socket.join(user.room)
         // console.log(user.username, 'has joined room', '"', room, '"')
-        socket.emit('message', generateMessage('Welcome, ' + username + "!")) // server to this client only
-        socket.broadcast.to(user.room).emit('message', generateMessage(username + ' has joined')) // this client to all other clients
+        socket.emit('message', generateMessage('Welcome, ' + username + "!"), {room: user.room}) // server to this client only
+        socket.broadcast.to(user.room).emit('message', generateMessage(username + ' has joined'), {room:user.room}) // this client to all other clients
         callback() // no error
     })
 
     socket.on('send', (message, callback) => {
         const thisClient = getUser(socket.id)
-        io.to(thisClient.room).emit('message', generateMessage(message))
+        io.to(thisClient.room).emit('message', generateMessage(message), thisClient)
         callback('delivered!') // without this (event acknowledgement), callback function don't work
     })
 
@@ -68,7 +68,7 @@ io.on('connection', (socket) => {
     socket.on('disconnect', () => {
         const user = removeUser(socket.id)
         if (user)
-            io.to(user.room).emit('message', generateMessage(user.username + ' disconnected.'))
+            io.to(user.room).emit('message', generateMessage(user.username + ' disconnected.'), {room:user.room})
     })
 
 })
