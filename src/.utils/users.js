@@ -3,8 +3,8 @@ const users = []
 // addUser, removeUser, getUser, getUsersInRoom
 
 const addUser = ({ id, username, room }) => {
-    username = username.trim().toLowerCase()
-    room = room.trim().toLowerCase()
+    username = username.trim()
+    room = room.trim()
 
     // validate
     if (!username || !room) {

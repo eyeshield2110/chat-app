@@ -32,7 +32,7 @@ io.on('connection', (socket) => {
     */
 /* ------------------- End event listener : counter ------------------- */
 
-/* ------------------- Add event listener : Welcome ! ------------------- */
+/* ------------------- Add event listener : connection ------------------- */
 
 io.on('connection', (socket) => {
     console.log('New Websocket connection.')
@@ -42,7 +42,6 @@ io.on('connection', (socket) => {
     socket.broadcast.emit('message', generateMessage('A new user has joined')) // all clients receives this except the emitting client
 */
     // join room
-
     socket.on('join', ({username, room}, callback) => {
         const {error, user} = addUser({id: socket.id, username, room})
 
@@ -55,6 +54,10 @@ io.on('connection', (socket) => {
         // console.log(user.username, 'has joined room', '"', room, '"')
         socket.emit('message', generateMessage('Welcome, ' + username + "!"), {room: user.room}) // server to this client only
         socket.broadcast.to(user.room).emit('message', generateMessage(username + ' has joined'), {room:user.room}) // this client to all other clients
+        io.to(user.room).emit('roomData', {
+            room: user.room,
+            users: getUsersInRoom(user.room)
+        })
         callback() // no error
     })
 
@@ -68,19 +71,19 @@ io.on('connection', (socket) => {
     // send to all clients except emitting one when disconnection
     socket.on('disconnect', () => {
         const user = removeUser(socket.id)
-        if (user)
-            io.to(user.room).emit('message', generateMessage(user.username + ' disconnected.'), {room:user.room})
+        if (user) {
+            io.to(user.room).emit('message', generateMessage(user.username + ' disconnected.'), {room: user.room})
+            io.to(user.room).emit('roomData', {
+            room: user.room,
+            users: getUsersInRoom(user.room)
+        })
+        }
+
     })
 
 })
-/* ------------------- End event listener : Welcome ! ------------------- */
+/* ------------------- End event listener : connection ------------------- */
 
-/* ------------------- Add event listener : Support user messages ------------------- */
-/* ------------------- End event listener : Support user messages ------------------- */
-
-app.get('/', (req, res) => {
-    res.send('Chat App')
-})
 
 server.listen(port, () => {
     console.log('Server is up on port ', port)

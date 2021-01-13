@@ -17,10 +17,32 @@ document.querySelector('#increment')
     */
 /* ---------------------------- End Event Listener: counter ---------------------------  */
 
+/* --------------------------- Add Event Listener: display room name --------------------------- */
+socket.on('roomData', ({room, users}) => {
+    // console.log(room, users)
+    const html = Mustache.render(sidebarTemplate, {
+        room,
+        users,
+    })
+    document.querySelector('#sidebar').innerHTML = html
+})
+
+/* --------------------------- End Event Listener: display room name --------------------------- */
+
+socket.on('connection', (data, thisUser) => {
+    console.log(data, thisUser) // receives welcome message + user chat messages
+
+    const html = Mustache.render(messageTemplate, { // from mustache library
+
+    })
+    $messages.insertAdjacentHTML('beforeend', html)
+
+})
+
 /* ---------------------------- Event Listener: Display msg ---------------------------- */
 // server -> client: server display message on the client-side
 socket.on('message', (data, thisUser) => {
-    console.log(data) // receives welcome message + user chat messages
+    console.log(data, thisUser) // receives welcome message + user chat messages
 
     // display sender of the message; if sender is the server, display room name
     let sender = ''
@@ -29,7 +51,7 @@ socket.on('message', (data, thisUser) => {
     else
         sender = thisUser.username
     const html = Mustache.render(messageTemplate, { // from mustache library
-       username: sender,
+        username: sender,
         message: data.text,
         createdAt: moment(data.createdAt).format('h:mm a').toUpperCase() // from moment library
     })
@@ -46,7 +68,7 @@ const autoscroll = () => {
     const newMessageMargin = parseInt(newMessageStyles.marginBottom)
     const newMessageHeight = $newMessage.offsetHeight + newMessageMargin
 
-    console.log(newMessageStyles)
+    // console.log(newMessageStyles)
 
     // Visible height
     const visibleHeight = $messages.offsetHeight
@@ -76,6 +98,7 @@ const $messages = document.querySelector('#messages')
 
 //  ================== Templates ==================
 const messageTemplate = document.querySelector('#message-template').innerHTML
+const sidebarTemplate = document.querySelector('#sidebar-template').innerHTML
 /* ================== End Templates ================== */
 
 /* ================== Options ================== */

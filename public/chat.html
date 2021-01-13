@@ -8,12 +8,11 @@
 </head>
 <body>
     <div class="chat">
-        <div class="chat__sidebar">
+        <div id="sidebar" class="chat__sidebar">
 
         </div>
 
         <div class="chat__main">
-            <h1>Chat App</h1>
             <div id="messages" class="chat__messages"></div>
             <div class="compose">
                 <form id="message-form" autocomplete="off">
@@ -25,12 +24,6 @@
         </div>
     </div>
 
-  <!--
-    <button id="increment">+1</button>
-  -->
-
-
-
 
     <script id="message-template" type="text/html">
         <div class="message">
@@ -40,6 +33,17 @@
             </p>
             <p>{{message}}</p>
         </div>
+    </script>
+
+    <script id="sidebar-template" type="text/html">
+        <h1>Chat App</h1>
+        <h2 class="room-title">{{room}}</h2>
+        <h3 class="list-title">Users</h3>
+        <ul class="users">
+            {{#users}}
+                <li>{{username}}</li>
+            {{/users}}
+        </ul>
     </script>
 
     <script src="/socket.io/socket.io.js"></script>
