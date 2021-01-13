@@ -2,7 +2,9 @@ const path = require('path')
 const http = require('http')
 const express = require('express')
 const socketio = require('socket.io')
+const Qs = require('query-string')
 const { generateMessage } = require('./.utils/messages.js')
+const { addUser, removeUser, getUser, getUsersInRoom } = require("./.utils/users.js")
 
 const app = express()
 const server = http.createServer(app)
@@ -34,27 +36,39 @@ io.on('connection', (socket) => {
 
 io.on('connection', (socket) => {
     console.log('New Websocket connection.')
-    // send an event (server -> all clients): origin is the server
-    socket.emit('message', generateMessage('Welcome!'))
-    // all clients receives this except the emitting client
-    socket.broadcast.emit('message', generateMessage('A new user has joined'))
 
-    // join room
 /*
-    socket.on('join', ({ username, room }) => {
-        socket.join(room)
-    })
+    socket.emit('message', generateMessage('Welcome!')) // send an event (server -> all clients): origin is the server
+    socket.broadcast.emit('message', generateMessage('A new user has joined')) // all clients receives this except the emitting client
 */
-    // send an event (server -> all clients) when receiving event (client -> server)
-    // : origin is from one client
+    // join room
+
+    socket.on('join', ({username, room}, callback) => {
+        const {error, user} = addUser({id: socket.id, username, room})
+
+        if (error) {
+            console.log(error)
+            return callback(error)
+        }
+
+        socket.join(user.room)
+        // console.log(user.username, 'has joined room', '"', room, '"')
+        socket.emit('message', generateMessage('Welcome, ' + username + "!")) // server to this client only
+        socket.broadcast.to(user.room).emit('message', generateMessage(username + ' has joined')) // this client to all other clients
+        callback() // no error
+    })
+
     socket.on('send', (message, callback) => {
-        io.emit('message', generateMessage(message))
+        const thisClient = getUser(socket.id)
+        io.to(thisClient.room).emit('message', generateMessage(message))
         callback('delivered!') // without this (event acknowledgement), callback function don't work
     })
 
     // send to all clients except emitting one when disconnection
     socket.on('disconnect', () => {
-        io.emit('message', generateMessage('A user disconnected.'))
+        const user = removeUser(socket.id)
+        if (user)
+            io.to(user.room).emit('message', generateMessage(user.username + ' disconnected.'))
     })
 
 })
