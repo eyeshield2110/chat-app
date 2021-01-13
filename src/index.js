@@ -60,6 +60,7 @@ io.on('connection', (socket) => {
 
     socket.on('send', (message, callback) => {
         const thisClient = getUser(socket.id)
+        console.log(thisClient)
         io.to(thisClient.room).emit('message', generateMessage(message), thisClient)
         callback('delivered!') // without this (event acknowledgement), callback function don't work
     })

@@ -34,8 +34,37 @@ socket.on('message', (data, thisUser) => {
         createdAt: moment(data.createdAt).format('h:mm a').toUpperCase() // from moment library
     })
     $messages.insertAdjacentHTML('beforeend', html)
+    autoscroll()
 })
 /* ---------------------------- End Event Listener: Display msg ---------------------------- */
+
+/* ---------------------------- Autoscroll function ---------------------------- */
+const autoscroll = () => {
+    const $newMessage = $messages.lastElementChild
+    // Height of new msg
+    const newMessageStyles = getComputedStyle($newMessage)
+    const newMessageMargin = parseInt(newMessageStyles.marginBottom)
+    const newMessageHeight = $newMessage.offsetHeight + newMessageMargin
+
+    console.log(newMessageStyles)
+
+    // Visible height
+    const visibleHeight = $messages.offsetHeight
+
+    // Height of messages container
+    const containerHeight = $messages.scrollHeight
+
+    // How far I've scrolled
+    const scrollOffset = $messages.scrollTop + visibleHeight
+
+    if (containerHeight - newMessageHeight <= scrollOffset) {
+        $messages.scrollTop = $messages.scrollHeight
+    }
+
+
+}
+
+/* ---------------------------- End autoscroll function ---------------------------- */
 
 /* ------------------- Add event listener : Support user messages ------------------- */
 /* ================== Elements ================== */
@@ -68,7 +97,7 @@ $messageForm.addEventListener('submit', (event) => {
             $msgInput.value = ''
             $msgInput.focus()
             $submitBtn.removeAttribute('disabled')
-            console.log("Aknowledged: ", eventAcknowledged) // only the sender will see this
+            console.log("Acknowledged: ", eventAcknowledged) // only the sender will see this
         })
     })
 
